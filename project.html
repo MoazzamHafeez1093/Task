@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EventHub - Discover Events Near You</title>
+  <style>
+    /* GLOBAL RESET */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    /* NAVIGATION BAR */
+    .navbar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #667eea;
+    }
+
+    .mobile-menu {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      text-align: center;
+      color: white;
+      padding: 120px 2rem 80px;
+      margin-top: 80px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    /* ENHANCED SEARCH SECTION */
+    .search-section {
+      background: white;
+      padding: 2rem;
+      margin: -40px auto 0;
+      max-width: 800px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 10;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: #667eea;
+      outline: none;
+    }
+
+    .search-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .search-btn:hover {
+      background:#5a6fd8;
+    }
+
+    .clear-btn {
+      background: #f0f0f0;
+      color: #333;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .clear-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .filter-options {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .search-stats {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+      color: #666;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* LOADING SPINNER */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      background: white;
+      padding: 4rem 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .event-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid #f0f0f0;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .event-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .event-image {
+      height: 200px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-category {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .event-content {
+      padding: 1.5rem;
+    }
+
+    .event-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    .event-meta {
+      color: #666;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .event-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .event-description {
+      color: #666;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .event-price {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 1rem;
+    }
+
+    .register-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: 600;
+      transition: opacity 0.3s ease;
+    }
+
+    .register-btn:hover {
+      opacity: 0.9;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #666;
+      display: none;
+    }
+
+    .no-results h3 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    /* ENHANCED FOOTER */
+    .footer {
+      background: #222;
+      color: #eee;
+      padding: 3rem 2rem;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .footer h4 {
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .footer p, .footer a {
+      font-size: 0.95rem;
+      color: #ccc;
+      line-height: 1.6;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: #667eea;
+    }
+
+    .footer input[type="email"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      border-top: 1px solid #444;
+      padding-top: 1rem;
+    }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        flex-direction: column;
+        padding: 1rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .mobile-menu {
+        display: block;
+      }
+
+      .search-container {
+        flex-direction: column;
+      }
+
+      .search-btn, .clear-btn {
+        width: 100%;
+      }
+
+      .filter-options {
+        justify-content: center;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .events-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">EventHub</a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <button class="mobile-menu" id="mobileMenu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <h1>Discover Events Near You</h1>
+    <p>Find amazing local events, connect with your community, and create unforgettable memories</p>
+  </section>
+
+  <!-- Enhanced Search -->
+  <div class="search-section">
+    <div class="search-container">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search events by name, location, or category...">
+      <button class="search-btn" id="searchBtn">🔍 Search</button>
+      <button class="clear-btn" id="clearBtn">Clear</button>
+    </div>
+    <div class="filter-options">
+      <select class="filter-select" id="categoryFilter">
+        <option value="">All Categories</option>
+        <option value="music">Music</option>
+        <option value="tech">Technology</option>
+        <option value="food">Food & Drink</option>
+        <option value="art">Art & Culture</option>
+        <option value="sports">Sports</option>
+        <option value="business">Business</option>
+      </select>
+      <select class="filter-select" id="locationFilter">
+        <option value="">All Locations</option>
+        <option value="new york">New York</option>
+        <option value="san francisco">San Francisco</option>
+        <option value="chicago">Chicago</option>
+        <option value="los angeles">Los Angeles</option>
+        <option value="boston">Boston</option>
+      </select>
+      <select class="filter-select" id="priceFilter">
+        <option value="">All Prices</option>
+        <option value="free">Free</option>
+        <option value="paid">Paid</option>
+      </select>
+    </div>
+    <div class="search-stats" id="searchStats"></div>
+  </div>
+
+  <!-- Events -->
+  <main class="main-content" id="events">
+    <div class="container">
+      <h2 class="section-title">Featured Events</h2>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+      </div>
+      <div class="events-grid" id="eventsGrid"></div>
+      <div class="no-results" id="noResults">
+        <h3>No events found</h3>
+        <p>Try adjusting your search filters or explore different categories.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="contact">
+    <div class="footer-container">
+      <div>
+        <h4>About EventHub</h4>
+        <p>EventHub is your go-to platform for discovering exciting local events, workshops, concerts, and more. Whether you're looking to explore, learn, or have fun, we've got something for everyone.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <p><a href="#home">Home</a></p>
+        <p><a href="#events">Events</a></p>
+        <p><a href="#contact">Contact</a></p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>Email: moazzaam21@gmail.com</p>
+        <p>Phone: +92 336 2220642</p>
+        <p>Location: Islamabad, Pakistan</p>
+      </div>
+      <div>
+        <h4>Subscribe</h4>
+        <p>Get updates on the latest events directly to your inbox.</p>
+        <input type="email" placeholder="Your email address">
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2025 EventHub. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Enhanced JavaScript -->
+  <script>
+// Dummy JSON data - simulating API response
+    const eventsData = {
+      "events": [
+        {
+          "id": 1,
+          "title": "Summer Music Festival 2025",
+          "date": "July 21, 2025",
+          "location": "New York",
+          "category": "music",
+          "description": "Experience live music performances from top artists across multiple genres! Join us for a weekend of incredible music, food, and memories.",
+          "price": "$89",
+          "isFree": false
+        },
+        {
+          "id": 2,
+          "title": "Tech Innovation Conference",
+          "date": "August 10, 2025",
+          "location": "San Francisco",
+          "category": "tech",
+          "description": "Join innovators, developers, and industry leaders to explore the latest in AI, blockchain, and emerging technologies.",
+          "price": "Free",
+          "isFree": true
+        },
+        {
+          "id": 3,
+          "title": "Gourmet Food Carnival",
+          "date": "September 5, 2025",
+          "location": "Chicago",
+          "category": "food",
+          "description": "Enjoy delicious treats from local chefs, cooking competitions, and wine tastings in the heart of the city.",
+          "price": "$45",
+          "isFree": false
+        },
+        {
+          "id": 4,
+          "title": "Modern Art Exhibition",
+          "date": "August 15, 2025",
+          "location": "Los Angeles",
+          "category": "art",
+          "description": "Discover contemporary masterpieces from emerging and established artists in this curated exhibition.",
+          "price": "$25",
+          "isFree": false
+        },
+        {
+          "id": 5,
+          "title": "Marathon Training Workshop",
+          "date": "July 30, 2025",
+          "location": "Boston",
+          "category": "sports",
+          "description": "Free workshop for runners of all levels. Learn proper training techniques, nutrition tips, and injury prevention.",
+          "price": "Free",
+          "isFree": true
+        },
+        {
+          "id": 6,
+          "title": "Startup Pitch Competition",
+          "date": "September 20, 2025",
+          "location": "San Francisco",
+          "category": "business",
+          "description": "Watch innovative startups pitch their ideas to top investors. Network with entrepreneurs and VCs.",
+          "price": "$35",
+          "isFree": false
+        },
+        {
+          "id": 7,
+          "title": "Jazz Night Under the Stars",
+          "date": "August 25, 2025",
+          "location": "New York",
+          "category": "music",
+          "description": "An intimate evening of smooth jazz in Central Park. Bring a blanket and enjoy music under the night sky.",
+          "price": "Free",
+          "isFree": true
+        },
+        {
+          "id": 8,
+          "title": "Coding Bootcamp Demo Day",
+          "date": "September 10, 2025",
+          "location": "Chicago",
+          "category": "tech",
+          "description": "See what our bootcamp graduates have built! Presentations of final projects and networking opportunities.",
+          "price": "Free",
+          "isFree": true
+        }
+      ]
+    };
+
+// Global variables
+    let allEvents = [];
+    let filteredEvents = [];
+    
+    const eventsGrid = document.getElementById("eventsGrid");
+    const noResults = document.getElementById("noResults");
+    const loading = document.getElementById("loading");
+    const searchStats = document.getElementById("searchStats");
+    
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const locationFilter = document.getElementById("locationFilter");
+    const priceFilter = document.getElementById("priceFilter");
+
+// Simulate loading events from JSON/API
+    function loadEventsFromJSON() {
+      loading.style.display = "flex";
+      eventsGrid.style.display = "none";
+      
+// Simulate API delay
+      setTimeout(() => {
+        allEvents = eventsData.events;
+        filteredEvents = [...allEvents];
+        loading.style.display = "none";
+        eventsGrid.style.display = "grid";
+        displayEvents(filteredEvents);
+        updateSearchStats();
+      }, 1500);
+    }
+
+// Display events in the grid
+    function displayEvents(events) {
+      eventsGrid.innerHTML = "";
+      
+      if (events.length === 0) {
+        noResults.style.display = "block";
+        eventsGrid.style.display = "none";
+        return;
+      }
+      
+      noResults.style.display = "none";
+      eventsGrid.style.display = "grid";
+      
+      events.forEach(event => {
+        const card = document.createElement("div");
+        card.className = "event-card";
+        card.innerHTML = `
+          <div class="event-image">
+            <div class="event-category">${event.category.toUpperCase()}</div>
+            ${event.title.charAt(0)}
+          </div>
+          <div class="event-content">
+            <div class="event-title">${event.title}</div>
+            <div class="event-meta">
+              <span>📅 ${event.date}</span>
+              <span>📍 ${event.location}</span>
+            </div>
+            <div class="event-price">${event.price}</div>
+            <div class="event-description">${event.description}</div>
+            <button class="register-btn" onclick="registerForEvent(${event.id})">
+              ${event.isFree ? 'Register Free' : 'Buy Tickets'}
+            </button>
+          </div>
+        `;
+        eventsGrid.appendChild(card);
+      });
+    }
+
+// Enhanced search and filter function
+    function filterEvents() {
+      const searchQuery = searchInput.value.toLowerCase().trim();
+      const selectedCategory = categoryFilter.value.toLowerCase();
+      const selectedLocation = locationFilter.value.toLowerCase();
+      const selectedPrice = priceFilter.value;
+
+      filteredEvents = allEvents.filter(event => {
+        const matchesSearch = searchQuery === '' || 
+          event.title.toLowerCase().includes(searchQuery) ||
+          event.location.toLowerCase().includes(searchQuery) ||
+          event.category.toLowerCase().includes(searchQuery) ||
+          event.description.toLowerCase().includes(searchQuery);
+
+        const matchesCategory = selectedCategory === '' || 
+          event.category.toLowerCase() === selectedCategory;
+
+        const matchesLocation = selectedLocation === '' || 
+          event.location.toLowerCase() === selectedLocation;
+
+        const matchesPrice = selectedPrice === '' ||
+          (selectedPrice === 'free' && event.isFree) ||
+          (selectedPrice === 'paid' && !event.isFree);
+
+        return matchesSearch && matchesCategory && matchesLocation && matchesPrice;
+      });
+
+      displayEvents(filteredEvents);
+      updateSearchStats();
+    }
+
+// Update search statistics
+    function updateSearchStats() {
+      const total = allEvents.length;
+      const showing = filteredEvents.length;
+      const isFiltered = showing !== total;
+      
+      if (isFiltered) {
+        searchStats.textContent = `Showing ${showing} of ${total} events`;
+        searchStats.style.display = "block";
+      } else {
+        searchStats.textContent = `Showing all ${total} events`;
+        searchStats.style.display = "block";
+      }
+    }
+
+// Clear all filters
+    function clearAllFilters() {
+      searchInput.value = '';
+      categoryFilter.value = '';
+      locationFilter.value = '';
+      priceFilter.value = '';
+      filteredEvents = [...allEvents];
+      displayEvents(filteredEvents);
+      updateSearchStats();
+    }
+
+// Register for event (placeholder function)
+    function registerForEvent(eventId) {
+      const event = allEvents.find(e => e.id === eventId);
+      alert(`Registration initiated for: ${event.title}\n\nThis would normally redirect to a registration/payment page.`);
+    }
+
+// Event listeners
+    searchBtn.addEventListener("click", filterEvents);
+    clearBtn.addEventListener("click", clearAllFilters);
+    
+    searchInput.addEventListener("input", filterEvents);
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        filterEvents();
+      }
+    });
+    
+    categoryFilter.addEventListener("change", filterEvents);
+    locationFilter.addEventListener("change", filterEvents);
+    priceFilter.addEventListener("change", filterEvents);
+
+// Mobile navigation toggle
+    document.getElementById("mobileMenu").addEventListener("click", () => {
+      document.getElementById("navLinks").classList.toggle("active");
+    });
+
+//For Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+//To Initialize the application
+    document.addEventListener('DOMContentLoaded', () => {
+      loadEventsFromJSON();
+    });
+  </script>
+</body>
+</html>
