@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Featured Events</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header>
+    <div class="nav-container">
+      <div class="logo">EventHub</div>
+      <button class="mobile-menu" id="menuToggle">☰</button>
+      <nav id="navLinks">
+        <a href="#">Home</a>
+        <a href="#featured">Events</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Discover Events Near You</h1>
+    <p>Find what's happening in your city and register today!</p>
+  </section>
+
+  <section class="search-bar">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search events by name..." />
+  </section>
+
+  <section class="featured-events" id="featured">
+    <h2>Featured Events</h2>
+    <div class="loading">Loading events...</div>
+    <div class="event-list" id="eventList">
+      <!-- Events will be dynamically loaded here -->
+    </div>
+  </section>
+
+  <section class="extras" style="padding: 2rem 1rem; max-width: 1200px; margin: auto;">
+    <h3>Why Attend Our Events?</h3>
+    <ul style="list-style: disc; padding-left: 20px;">
+      <li>Meet like-minded individuals and expand your network.</li>
+      <li>Discover trends in your interests and industry.</li>
+      <li>Gain access to exclusive insights and knowledge.</li>
+    </ul>
+  </section>
+
+  <footer style="text-align: center; padding: 2rem 1rem; background-color: #333; color: white;">
+    <p>&copy; 2025 EventHub. All rights reserved.</p>
+    <p>Contact us at <a href="mailto:info@eventhub.com" style="color: #aad4ff;">info@eventhub.com</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
