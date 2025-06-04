@@ -5,7 +5,7 @@ Responsive page using html,css and javascript.
 A responsive event listing page with search functionality.
 
  Live Preview  
-[🔗 View on GitHub Pages](https://yourusername.github.io/event-listing) 
+[🔗 View on GitHub Pages]([https://yourusername.github.io/event-listing](https://github.com/MoazzamHafeez1093/Task.git)) 
 
  Technologies Used  
 - **HTML5** – Structure  
